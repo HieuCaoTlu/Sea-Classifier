@@ -11,9 +11,14 @@ sea_creatures = ["San hô", "Cua", "Cá heo", "Cá", "Sứa", "Tôm hùm", "Sên
 model = None
 file_id = '1HGbW5KMdge6s-Tc8LdKOxL-GRrRmNN1m'
 destination = 'model_scripted_2.pt'
-gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=False)
-if os.path.isfile(destination):
-    model = torch.jit.load('model_scripted_2.pt')
+
+def load_model():
+    global model
+    if model is None:
+        if not os.path.isfile(destination):
+            gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
+        model = torch.jit.load(destination)
+
 
 def preprocess_image(image, size=(224, 224)):
     image = image.resize(size)
@@ -25,6 +30,7 @@ def preprocess_image(image, size=(224, 224)):
 
 def prediction(img_path):
     global model, sea_creatures
+    load_model()
     animals = sea_creatures
     image = Image.open(img_path)
     input_tensor = preprocess_image(image)
