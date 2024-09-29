@@ -9,6 +9,11 @@ app = Flask(__name__)
 sea_creatures = ["San hô", "Cua", "Cá heo", "Cá", "Sứa", "Tôm hùm", "Sên biển", "Bạch tuộc", "Rái cá", 
                  "Cá nóc", "Cá đuối", "Nhím biển", "Cá mập", "Sao biển", "Rùa", "Cá voi"]
 model = None
+file_id = '1HGbW5KMdge6s-Tc8LdKOxL-GRrRmNN1m'
+destination = 'model_scripted_2.pt'
+gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=False)
+if os.path.isfile(destination):
+    model = torch.jit.load('model_scripted_2.pt')
 
 def preprocess_image(image, size=(224, 224)):
     image = image.resize(size)
@@ -17,23 +22,10 @@ def preprocess_image(image, size=(224, 224)):
     image_tensor = torch.tensor(image_array).permute(2, 0, 1)
     return image_tensor.unsqueeze(0)
 
-def loader():
-    global model
-    file_id = '1HGbW5KMdge6s-Tc8LdKOxL-GRrRmNN1m'
-    destination = 'model_scripted_2.pt'
-    if not os.path.isfile(destination):
-        gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=False)
-        if os.path.isfile(destination):
-            model = torch.jit.load('model_scripted_2.pt')
-        else:
-            print('Lỗi không load được mô hình')
-    else:
-        model = torch.jit.load('model_scripted_2.pt')
 
 def prediction(img_path):
     global model, sea_creatures
     animals = sea_creatures
-    loader()
     image = Image.open(img_path)
     input_tensor = preprocess_image(image)
     model.to(torch.device('cpu'))
@@ -47,7 +39,6 @@ def prediction(img_path):
 def get_top_3_classes(img_path):
     global model, sea_creatures
     animals = sea_creatures
-    loader()
     image = Image.open(img_path)
     input_tensor = preprocess_image(image)
     model.to(torch.device('cpu'))
@@ -57,6 +48,7 @@ def get_top_3_classes(img_path):
         outputs = model(input_tensor)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
         top_probs, top_classes = torch.topk(probabilities, 3)
+        top_probs = torch.round(top_probs * 100).int()
 
     return [(animals[idx.item()], prob.item()) for idx, prob in zip(top_classes[0], top_probs[0])]
 
@@ -65,7 +57,7 @@ def index():
     if os.path.isfile('object.jpg'):
         os.remove('object.jpg')
         os.remove('./static/object.jpg')
-    return render_template('index.html', appName="Sea Animals Classifier", image='./static/placeholder.jpg', decoration=True, result = 'Đang đợi nhập', crab=False)
+    return render_template('index2.html', appName="Sea Animals Classifier", image='./static/placeholder.jpg', decoration=True, result = 'Đang đợi nhập', crab=False)
 
 
 @app.route('/', methods=['POST'])
@@ -79,13 +71,15 @@ def upload_image():
     
     static_file_path = './static/object.jpg'
     img = Image.open(file.stream)
+    if img.mode == 'RGBA':
+        img = img.convert('RGB')
     img.save(static_file_path, "JPEG")
 
     result = prediction(static_file_path)
     if result == "Cua": crab=True
     else: crab = False
     top_3_classes = get_top_3_classes(static_file_path)
-    return render_template('index.html', appName="Sea Animals Classifier", image=static_file_path, decoration=False, result=result, crab=crab, top_3=top_3_classes)
+    return render_template('index2.html', appName="Sea Animals Classifier", image=static_file_path, decoration=False, result=result, crab=crab, top_3=top_3_classes)
 
 if __name__ == '__main__':
     app.run(debug=True)
