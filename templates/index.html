@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fadeIn {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .scrollbar-hidden::-webkit-scrollbar {
+            display: none; /* Ẩn thanh cuộn trên Chrome, Safari, and Opera */
+        }
+
+        .scrollbar-hidden {
+            -ms-overflow-style: none;  /* Ẩn thanh cuộn trên Internet Explorer và Edge */
+            scrollbar-width: none;  /* Ẩn thanh cuộn trên Firefox */
+        }
+    </style>
+</head>
+
+<body>
+
+    <body class="bg-[#E0E0E0] h-screen flex items-center justify-center">
+        <div class="bg-white w-full max-w-[97%] h-full max-h-[93%] p-4 rounded-[40px] flex flex-col md:flex-row">
+            <div class="w-full md:w-1/2 p-4 flex flex-col justify-between pl-9">
+                <!-- Dòng 1 -->
+                <div>
+                    <h2 class="text-lg font-semibold">EfficientNet B1 1.0 A84</h2>
+                </div>
+
+                <!-- Dòng 2 -->
+                <div class="flex-grow flex flex-col items-start justify-center">
+                    <h1 class="text-6xl font-bold flex items-end">
+                        Dự đoán
+                        <img src="static/star.png" alt="Hình ảnh dự đoán"
+                            class="w-24 h-24 mx-4 object-cover saturate-150 brightness-110">
+                    </h1>
+                    <h1 class="text-6xl font-bold mt-2">Sinh vật biển</h1>
+                    <p class="mb-4 mt-4 text-lg">Nhận biết loài sinh vật bằng phương pháp học máy<br>Lưu ý, mô hình này là tay mơ, sẽ đôi lúc có sai sót</p>
+                    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                        <input type="file" name="image" accept="image/*" id="fileInput" class="hidden"
+                            onchange="this.form.submit();">
+                        <input type="submit" value="Dự đoán"
+                            class="flex items-center bg-gradient-to-r from-[#0098D9] to-[#4E5BFF] text-white px-9 py-3 rounded-[20px] transition duration-300 ease-in-out transform hover:scale-105 hover:opacity-90"
+                            onclick="document.getElementById('fileInput').click(); return false;">
+                        </button>
+                    </form>
+
+
+
+                </div>
+
+                <!-- Dòng 3 -->
+                <div class="mb-4 font-bold text-2xl">Danh sách sinh vật có thể dự đoán</div>
+                <div class="relative w-full max-w-[500px] overflow-hidden">
+                    <!-- Hiệu ứng làm mờ -->
+                    <div class="absolute left-0 top-0 h-full w-10 from-white to-transparent pointer-events-none"></div>
+                    <div class="absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+                
+                    <div
+                        class="flex gap-2 overflow-x-auto scrollbar-hidden cursor-grab"
+                        id="slider"
+                        onmousedown="startDragging(event)"
+                        onmouseup="stopDragging()"
+                        onmouseleave="stopDragging()"
+                        onmousemove="drag(event)"
+                    >
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">San hô</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cua</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá heo</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Sứa</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Tôm hùm</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Sên biển</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Bạch tuộc</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Rái cá</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá nóc</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá đuối</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Nhím biển</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá mập</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Sao biển</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Rùa</span>
+                    <span class="bg-blue-700 text-white rounded-full px-4 py-2 hover:bg-blue-800 transition duration-200 cursor-pointer text-lg flex-shrink-0">Cá voi</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-500">© CPCPBTL, Thăng Long University</p>
+                </div>
+            </div>
+            <div class="w-1/2 p-4 flex items-center justify-center">
+                <div class="relative w-full h-full max-w-[1024px] max-h-[1024px]">
+                    <img id="displayImage" src="{{ image }}" alt="Placeholder"
+                        class="absolute inset-0 w-full h-full object-cover rounded-[40px]">
+                    {% if decoration %}
+                    <img src="static/logo.png" alt="Logo"
+                        class="absolute inset-x-0 top-1/2 transform -translate-y-1/2 mx-auto w-1/4">
+                    {% endif %}
+                    <div
+                        class="absolute inset-x-0 bottom-4 text-center bg-white max-w-max mx-auto px-12 py-3 rounded-[20px] shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 fadeIn">
+                        <h5>Kết quả dự đoán</h5>
+                        <h1
+                            class="text-3xl font-bold bg-gradient-to-r from-[#0098D9] to-[#4E5BFF] text-transparent bg-clip-text">
+                            {{ result }}
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</body>
+<script>
+    let isDragging = false;
+    let startX;
+    let scrollLeft;
+
+    function startDragging(e) {
+        isDragging = true;
+        startX = e.pageX - document.getElementById('slider').offsetLeft;
+        scrollLeft = document.getElementById('slider').scrollLeft;
+        document.getElementById('slider').classList.remove('cursor-grab');
+        document.getElementById('slider').classList.add('cursor-grabbing');
+    }
+
+    function stopDragging() {
+        isDragging = false;
+        document.getElementById('slider').classList.add('cursor-grab');
+        document.getElementById('slider').classList.remove('cursor-grabbing');
+    }
+
+    function drag(e) {
+        if (!isDragging) return; // ngăn không cho kéo khi không đang kéo
+        e.preventDefault();
+        const x = e.pageX - document.getElementById('slider').offsetLeft;
+        const walk = (x - startX) * 2; // tốc độ kéo
+        document.getElementById('slider').scrollLeft = scrollLeft - walk;
+    }
+</script>
+
+</html>
