@@ -12,12 +12,8 @@ sea_creatures = ['Trai', 'San hô', 'Cua', 'Cá heo', 'Lươn',
  'Cá ngựa', 'Cá mập', 'Tôm', 'Mực', 'Sao biển',
  'Rùa', 'Cá voi']
 model = None
-<<<<<<< HEAD
 file_id = '1lYX35m1fpQ9TWAcV-cTaQSFAY4MGO9Tb'
 destination = 'bestbest.pt'
-=======
-file_id = '1HGbW5KMdge6s-Tc8LdKOxL-GRrRmNN1m'
-destination = 'model_scripted_2.pt'
 
 def load_model():
     global model
@@ -26,7 +22,6 @@ def load_model():
             gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
         model = torch.jit.load(destination)
 
->>>>>>> d4c1cf52a5656862efc4be14b1eafed7b262bcfd
 
 def load_model():
     global model
