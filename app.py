@@ -6,9 +6,16 @@ import torch
 import gdown
 
 app = Flask(__name__)
-sea_creatures = ["San hô", "Cua", "Cá heo", "Cá", "Sứa", "Tôm hùm", "Sên biển", "Bạch tuộc", "Rái cá", 
-                 "Cá nóc", "Cá đuối", "Nhím biển", "Cá mập", "Sao biển", "Rùa", "Cá voi"]
+sea_creatures = ['Trai', 'San hô', 'Cua', 'Cá heo', 'Lươn',
+ 'Cá', 'Sứa', 'Tôm hùm', 'Sên biển', 'Bạch tuộc',
+ 'Rái cá', 'Chim cánh cụt', 'Cá nóc', 'Cá đuối', 'Cầu gai',
+ 'Cá ngựa', 'Cá mập', 'Tôm', 'Mực', 'Sao biển',
+ 'Rùa', 'Cá voi']
 model = None
+<<<<<<< HEAD
+file_id = '1lYX35m1fpQ9TWAcV-cTaQSFAY4MGO9Tb'
+destination = 'bestbest.pt'
+=======
 file_id = '1HGbW5KMdge6s-Tc8LdKOxL-GRrRmNN1m'
 destination = 'model_scripted_2.pt'
 
@@ -19,8 +26,19 @@ def load_model():
             gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
         model = torch.jit.load(destination)
 
+>>>>>>> d4c1cf52a5656862efc4be14b1eafed7b262bcfd
 
-def preprocess_image(image, size=(224, 224)):
+def load_model():
+    global model
+    if model is None:
+        print('LOADED')
+        if not os.path.isfile(destination):
+            gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
+        
+        model = torch.jit.load(destination)
+
+
+def preprocess_image(image, size=(260, 260)):
     image = image.resize(size)
     image_array = np.array(image).astype(np.float32)
     image_array /= 255.0
