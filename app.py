@@ -2,82 +2,54 @@ import os
 from flask import Flask, request, render_template, jsonify
 from PIL import Image
 import numpy as np
-import torch
+import onnxruntime as ort
 import gdown
 
 app = Flask(__name__)
 sea_creatures = ['Trai', 'San hô', 'Cua', 'Cá heo', 'Lươn',
  'Cá', 'Sứa', 'Tôm hùm', 'Sên biển', 'Bạch tuộc',
- 'Rái cá', 'Chim cánh cụt', 'Cá nóc', 'Cá đuối', 'Cầu gai',
+ 'Rái cá', 'Chim cánh cừ', 'Cá nóc', 'Cá đuối', 'Cầu gai',
  'Cá ngựa', 'Cá mập', 'Tôm', 'Mực', 'Sao biển',
  'Rùa', 'Cá voi']
-model = None
-file_id = '1lYX35m1fpQ9TWAcV-cTaQSFAY4MGO9Tb'
-destination = 'bestbest.pt'
+model_path = "model.onnx"
+file_id = '13mSlO2eCOuU7DVA5ctC2JQ_J0ogbdfss'
+destination = 'model.onnx'
 
 def load_model():
-    global model
-    if model is None:
-        if not os.path.isfile(destination):
-            gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
-        model = torch.jit.load(destination)
-
-
-def load_model():
-    global model
-    if model is None:
-        print('LOADED')
-        if not os.path.isfile(destination):
-            gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
-        
-        model = torch.jit.load(destination)
-
+    if not os.path.isfile(destination):
+        gdown.download(f'https://drive.google.com/uc?id={file_id}', destination, quiet=True)
+    return ort.InferenceSession(destination)
 
 def preprocess_image(image, size=(260, 260)):
     image = image.resize(size)
-    image_array = np.array(image).astype(np.float32)
-    image_array /= 255.0
-    image_tensor = torch.tensor(image_array).permute(2, 0, 1)
-    return image_tensor.unsqueeze(0)
-
+    image_array = np.array(image).astype(np.float32) / 255.0
+    image_array = np.transpose(image_array, (2, 0, 1))  # Chuyển kênh ảnh về (C, H, W)
+    return np.expand_dims(image_array, axis=0)  # Thêm batch dimension
 
 def prediction(img_path):
-    global model, sea_creatures
-    load_model()
-    animals = sea_creatures
+    model = load_model()  # Load model here
     image = Image.open(img_path)
     input_tensor = preprocess_image(image)
-    model.to(torch.device('cpu'))
-    model.eval()
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        _, predicted = torch.max(outputs, 1)
-    predicted_class = animals[predicted.item()]
-    return predicted_class
+    outputs = model.run(None, {model.get_inputs()[0].name: input_tensor})
+    predicted_class = np.argmax(outputs[0])
+    return sea_creatures[predicted_class]
 
 def get_top_3_classes(img_path):
-    global model, sea_creatures
-    animals = sea_creatures
+    model = load_model()  # Load model here
     image = Image.open(img_path)
     input_tensor = preprocess_image(image)
-    model.to(torch.device('cpu'))
-    model.eval()
-    
-    with torch.no_grad():
-        outputs = model(input_tensor)
-        probabilities = torch.nn.functional.softmax(outputs, dim=1)
-        top_probs, top_classes = torch.topk(probabilities, 3)
-        top_probs = torch.round(top_probs * 100).int()
-
-    return [(animals[idx.item()], prob.item()) for idx, prob in zip(top_classes[0], top_probs[0])]
+    outputs = model.run(None, {model.get_inputs()[0].name: input_tensor})
+    probabilities = np.exp(outputs[0]) / np.sum(np.exp(outputs[0]))
+    top_classes = np.argsort(probabilities[0])[-3:][::-1]
+    top_probs = probabilities[0][top_classes] * 100
+    return [(sea_creatures[idx], int(prob)) for idx, prob in zip(top_classes, top_probs)]
 
 @app.route('/', methods=['GET'])
 def index():
     if os.path.isfile('object.jpg'):
         os.remove('object.jpg')
         os.remove('./static/object.jpg')
-    return render_template('index2.html', appName="Sea Animals Classifier", image='./static/placeholder.jpg', decoration=True, result = 'Đang đợi nhập', crab=False)
-
+    return render_template('index2.html', appName="Sea Animals Classifier", image='./static/placeholder.jpg', decoration=True, result='Đang đợi nhập', crab=False)
 
 @app.route('/', methods=['POST'])
 def upload_image():
@@ -95,9 +67,9 @@ def upload_image():
     img.save(static_file_path, "JPEG")
 
     result = prediction(static_file_path)
-    if result == "Cua": crab=True
-    else: crab = False
+    crab = result == "Cua"
     top_3_classes = get_top_3_classes(static_file_path)
+    
     return render_template('index2.html', appName="Sea Animals Classifier", image=static_file_path, decoration=False, result=result, crab=crab, top_3=top_3_classes)
 
 if __name__ == '__main__':
