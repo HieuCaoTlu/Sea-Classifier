@@ -12,7 +12,7 @@ sea_creatures = ['Trai', 'San hô', 'Cua', 'Cá heo', 'Lươn',
  'Cá ngựa', 'Cá mập', 'Tôm', 'Mực', 'Sao biển',
  'Rùa', 'Cá voi']
 model_path = "model.onnx"
-file_id = '13mSlO2eCOuU7DVA5ctC2JQ_J0ogbdfss'
+file_id = '1sHmBCW1e_TSq_CeIkL3FjVGCU9u6NzSc'
 destination = 'model.onnx'
 
 def load_model():
